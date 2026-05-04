@@ -1,16 +1,18 @@
 package com.dream.dreamshops.service.product;
 
-import com.dream.dreamshops.exceptions.ProductNotFoundException;
+import com.dream.dreamshops.dto.ImageDto;
+import com.dream.dreamshops.dto.ProductDto;
+import com.dream.dreamshops.exceptions.ResourceNotFoundException;
 import com.dream.dreamshops.model.Category;
 import com.dream.dreamshops.model.Image;
 import com.dream.dreamshops.model.Product;
 import com.dream.dreamshops.repository.CategoryRepository;
+import com.dream.dreamshops.repository.ImageRepository;
 import com.dream.dreamshops.repository.ProductRepository;
 import com.dream.dreamshops.request.AddProductRequest;
 import com.dream.dreamshops.request.ProductUpdateRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jmx.export.metadata.ManagedMetric;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,6 +24,8 @@ import java.util.Optional;
 public class ProductService implements IProductService{
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final ModelMapper modelMapper;
+    private final ImageRepository imageRepository;
 
 
     @Override
@@ -55,28 +59,22 @@ public class ProductService implements IProductService{
     @Override
     public Product getProductById(Long id) {
         return productRepository.findById(id)
-                .orElseThrow(()-> new ProductNotFoundException("Product not found!"));
+                .orElseThrow(()-> new ResourceNotFoundException("Product not found!"));
     }
 
     @Override
     public void deleteProductById(Long id) {
         productRepository.findById(id)
                 .ifPresentOrElse(productRepository::delete,
-                        () -> {throw new ProductNotFoundException("Product not found");});
+                        () -> {throw new ResourceNotFoundException("Product not found");});
     }
 
-
-
-    @Override
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
-    }
     @Override
     public Product updateProduct(ProductUpdateRequest request, Long productId){
         return productRepository.findById(productId)
                 .map(existingProduct -> updateExistingProduct(existingProduct,request))
                 .map(productRepository :: save)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found!"));
     }
 
     private Product updateExistingProduct(Product existingProduct, ProductUpdateRequest request){
@@ -89,6 +87,10 @@ public class ProductService implements IProductService{
         Category category = categoryRepository.findByName(request.getCategory().getName());
         existingProduct.setCategory(category);
         return existingProduct;
+    }
+    @Override
+    public List<Product> getAllProducts(){
+        return productRepository.findAll();
     }
 
     @Override
@@ -108,6 +110,7 @@ public class ProductService implements IProductService{
     }
     @Override
     public List<Product> getProductsByName(String name) {
+
         return productRepository.findByName(name);
     }
 
@@ -119,5 +122,22 @@ public class ProductService implements IProductService{
     @Override
     public Long countProductsByBrandAndName(String brand, String name) {
         return productRepository.countByBrandAndName(brand, name);
+    }
+
+    @Override
+    public List<ProductDto> getConvertedProducts(List<Product> products) {
+        return products.stream().map(this::convertToDto).toList();
+    }
+
+    @Override
+    public ProductDto convertToDto(Product product){
+        ProductDto productDto = modelMapper.map(product, ProductDto.class);
+        List<Image> images = imageRepository.findByProductId(product.getId());
+        List<ImageDto> imageDtos = images.stream().
+                map(image -> modelMapper.map(image, ImageDto.class)).
+                toList();
+
+        productDto.setImages(imageDtos);
+        return productDto;
     }
 }
