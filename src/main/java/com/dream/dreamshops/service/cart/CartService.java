@@ -33,7 +33,7 @@ public class CartService implements ICartService {
         Cart cart = getCart(id);
         cartItemRepository.deleteAllByCartId(id);
         cart.getItems().clear();
-        cart.deleteById(id);
+        cartRepository.deleteById(id);
     }
 
     @Override
@@ -45,8 +45,6 @@ public class CartService implements ICartService {
     @Override
     public Long initializeNewCart() {
         Cart newCart = new Cart();
-        Long newCartId = cartIdGenerator.incrementAndGet();
-        newCart.setId(newCartId);
         return cartRepository.save(newCart).getId();
     }
 
@@ -54,7 +52,5 @@ public class CartService implements ICartService {
     public Cart getCartByUserid(Long userId) {
         return cartRepository.findByUserId(userId);
     }
-
-   
 
 }
