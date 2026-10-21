@@ -1,6 +1,8 @@
 package com.dream.dreamshops.controller;
 
 import com.dream.dreamshops.exceptions.ResourceNotFoundException;
+import com.dream.dreamshops.model.Cart;
+import com.dream.dreamshops.model.User;
 import com.dream.dreamshops.response.ApiResponse;
 import com.dream.dreamshops.service.cart.ICartItemService;
 import com.dream.dreamshops.service.cart.ICartService;
@@ -22,9 +24,10 @@ public class CartItemController {
                                                      @RequestParam Long productId,
                                                      @RequestParam (required = false) Integer quantity){
         try{
-            if(cartId == null){
-                cartId=cartService.initializeNewCart();
-            }
+            UserController userService = null;
+            User user = userService.getUserById(1L);
+            Cart cartId=cartService.initializeNewCart();
+
             cartItemService.addItemToCart(cartId, productId, quantity);
             return ResponseEntity.ok(new ApiResponse("Add Item Success", null));
         }catch (ResourceNotFoundException e){

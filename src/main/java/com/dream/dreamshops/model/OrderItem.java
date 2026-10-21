@@ -1,5 +1,6 @@
 package com.dream.dreamshops.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,25 +12,26 @@ import java.math.BigDecimal;
 @Setter
 @NoArgsConstructor
 @Entity
-public class OrderItem {
+public class OrderItem{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private int quantity;
     private BigDecimal price;
 
+    
     @ManyToOne
-    @JoinColumn(name="order_id")
+    @JoinColumn(name = "order_id")
     private Order order;
 
     @ManyToOne
-    @JoinColumn
+    @JoinColumn(name = "product_id")
     private Product product;
 
-    public OrderItem(Order order, Product product, int quantity, BigDecimal price){
-        this.order = order;
-        this.product = product;
+    public OrderItem(Order order, Product product, int quantity, BigDecimal price) {
         this.quantity = quantity;
         this.price = price;
+        this.order = order;
+        this.product = product;
     }
 }

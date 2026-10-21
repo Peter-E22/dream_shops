@@ -1,7 +1,6 @@
 package com.dream.dreamshops.model;
 
 import jakarta.persistence.*;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,8 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class User {
-
+public class User{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,9 +24,10 @@ public class User {
     private String email;
     private String password;
 
-    @OneToOne(mappedBy="user", cascade = CascadeType.ALL, orphanRemoval=true)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Cart cart;
 
-    @OneToMany(mappedBy ="user", cascade = CascadeType.ALL, orphanRemoval=true)
+    @OneToMany(mappedBy ="user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders;
+
 }
